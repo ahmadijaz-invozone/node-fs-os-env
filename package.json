@@ -1,0 +1,23 @@
+{
+  "name": "training",
+  "version": "1.0.0",
+  "description": "Jan 05, 2021 Node Learning: FS, OS, and DotEnv are the modules used.",
+  "main": "app.js",
+  "dependencies": {
+    "dotenv": "^8.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahmadijaz-invozone/node-fs-os-env.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ahmadijaz-invozone/node-fs-os-env/issues"
+  },
+  "homepage": "https://github.com/ahmadijaz-invozone/node-fs-os-env#readme"
+}
