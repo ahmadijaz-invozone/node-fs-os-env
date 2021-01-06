@@ -1,31 +1,26 @@
-const os = require("os");
-const fs = require("fs");
-const env = require("dotenv").config();
+const os = require('os');
+const fs = require('fs');
+const env = require('dotenv').config();
 
 // Get the Os Info and return it
 const OsInfo = async function GetOsInformation() {
-  return (
-    "Type = " +
-    JSON.stringify(os.type()) +
-    "\nUptime = " +
-    JSON.stringify(os.uptime()) +
-    "\nMy Info = " +
-    JSON.stringify(os.userInfo())
-  );
+  return `Type = ${JSON.stringify(os.type())}\nUptime = ${JSON.stringify(
+    os.uptime()
+  )}\nMy Info = ${JSON.stringify(os.userInfo())}`;
 };
 
-//Check and create folder if it doesn't exists
+// Check and create folder if it doesn't exists
 const CheckDirectory = function CheckAndCreateDirectory(Directory) {
   return new Promise((resolve, reject) => {
     if (!fs.existsSync(Directory)) {
-      fs.mkdir(Directory, function (err) {
+      fs.mkdir(Directory, (err) => {
         if (err) {
           reject(err);
         } else {
-          resolve("Directory Created successfully!");
+          resolve('Directory Created successfully!');
         }
       });
-    } else resolve("Directory already Exists!");
+    } else resolve('Directory already Exists!');
   });
 };
 
@@ -36,7 +31,7 @@ const CheckFileRights = function CheckRightsAtFilePath(FilePath, Right) {
       if (err) {
         reject(err);
       } else {
-        resolve("Successful.");
+        resolve('Successful.');
       }
     });
   });
@@ -46,13 +41,13 @@ const CheckFileRights = function CheckRightsAtFilePath(FilePath, Right) {
 const WriteFile = function WriteFileContentToFilePath(FileContent, FilePath) {
   return new Promise((resolve, reject) => {
     CheckFileRights(FilePath, fs.constants.F_OK)
-      .then((success) => {
-        reject("File already Exists!");
+      .then(() => {
+        resolve('File already Exists!');
       })
-      .catch((err) => {
-        fs.writeFile(FilePath, FileContent, function (err) {
+      .catch(() => {
+        fs.writeFile(FilePath, FileContent, (err) => {
           if (err) reject(err);
-          else resolve("Successful!");
+          else resolve('Successful!');
         });
       });
   });
@@ -62,8 +57,8 @@ const WriteFile = function WriteFileContentToFilePath(FileContent, FilePath) {
 const ReadFile = function ReadFileContentFromFilePath(FilePath) {
   return new Promise((resolve, reject) => {
     CheckFileRights(FilePath, fs.constants.R_OK)
-      .then((success) => {
-        fs.readFile(FilePath, "utf8", function (err, data) {
+      .then(() => {
+        fs.readFile(FilePath, 'utf8', (err, data) => {
           if (err) reject(err);
           else resolve(data);
         });
@@ -74,14 +69,14 @@ const ReadFile = function ReadFileContentFromFilePath(FilePath) {
   });
 };
 
-//main function uses above all function
+// main function uses above all function
 const StoreInfoToFile = async function GetOsInfoWriteToFileThenReadFromFile() {
   try {
     const FileContent = await OsInfo();
     const Directory = os.homedir + env.parsed.FILE_PATH;
     const FilePath = Directory + env.parsed.FILE_NAME;
 
-    console.log("\nCreate Directory : ");
+    console.log('\nCreate Directory : ');
     await CheckDirectory(Directory)
       .then((success) => {
         console.log(success);
@@ -90,7 +85,7 @@ const StoreInfoToFile = async function GetOsInfoWriteToFileThenReadFromFile() {
         console.log(err);
       });
 
-    console.log("\nWrite File : ");
+    console.log('\nWrite File : ');
     await WriteFile(FileContent, FilePath)
       .then((success) => {
         console.log(success);
@@ -99,19 +94,19 @@ const StoreInfoToFile = async function GetOsInfoWriteToFileThenReadFromFile() {
         console.log(error);
       });
 
-    console.log("\nRead File : ");
+    console.log('\nRead File : ');
 
     ReadFile(FilePath)
       .then((success) => {
-        console.log(success + "\n");
+        console.log(`${success}\n`);
       })
       .catch((error) => {
-        console.log(error + "\n");
+        console.log(`${error}\n`);
       });
   } catch (error) {
-    console.log(error + "\n");
+    console.log(`${error}\n`);
   }
 };
 
-//Calling the main function
+// Calling the main function
 StoreInfoToFile();
