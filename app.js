@@ -13,12 +13,18 @@ const OsInfo = function GetOsInformation() {
   );
 };
 
-// write given content to file in a given path 
+// write given content to file in a given path
 const WriteFile = function WriteFileContentToFilePath(FileContent, FilePath) {
   return new Promise((resolve, reject) => {
-    fs.writeFile(FilePath, FileContent, function (err) {
-      if (err) reject(err);
-      else resolve("Successful.");
+    fs.access(FilePath, fs.constants.F_OK, (err) => {
+      if (err) {
+        fs.writeFile(FilePath, FileContent, function (err) {
+          if (err) reject(err);
+          else resolve("Successful.");
+        });
+      } else {
+        reject("File already Exists!");
+      }
     });
   });
 };
@@ -47,17 +53,17 @@ const StoreInfoToFile = function GetOsInfoWriteToFileThenReadFromFile() {
 
         ReadFile(FilePath)
           .then((success) => {
-            console.log(success + '\n');
+            console.log(success + "\n");
           })
           .catch((error) => {
-            console.log(error);
+            console.log(error+ "\n");
           });
       })
       .catch((error) => {
-        console.log(error);
+        console.log(error+ "\n");
       });
   } catch (error) {
-    console.log(error);
+    console.log(error+ "\n");
   }
 };
 
