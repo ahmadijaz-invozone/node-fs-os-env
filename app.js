@@ -13,29 +13,49 @@ const OsInfo = function GetOsInformation() {
   );
 };
 
+// Check file rights at given path with given rights
+const CheckFileRights = function CheckFileRightsAtFilePathWithGivenRights (FilePath, Right) {
+  return new Promise((resolve, reject) => {
+    fs.access(FilePath, Right, (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve("Successful.");
+      }
+    });
+  });
+};
+
 // write given content to file in a given path
 const WriteFile = function WriteFileContentToFilePath(FileContent, FilePath) {
   return new Promise((resolve, reject) => {
-    fs.access(FilePath, fs.constants.F_OK, (err) => {
-      if (err) {
+    CheckFileRights(FilePath, fs.constants.F_OK)
+      .then(success => {
+        reject("File already Exists!");
+      })
+      .catch(err => {
         fs.writeFile(FilePath, FileContent, function (err) {
           if (err) reject(err);
-          else resolve("Successful.");
+          else resolve("Successful!");
         });
-      } else {
-        reject("File already Exists!");
-      }
-    });
+      });
   });
 };
 
 // read file from the given path
 const ReadFile = function ReadFileContentFromFilePath(FilePath) {
   return new Promise((resolve, reject) => {
-    fs.readFile(FilePath, "utf8", function (err, data) {
-      if (err) reject(err);
-      else resolve(data);
-    });
+
+    CheckFileRights(FilePath, fs.constants.R_OK)
+      .then(success => {
+        fs.readFile(FilePath, "utf8", function (err, data) {
+          if (err) reject(err);
+          else resolve(data);
+        });
+      })
+      .catch(err => {
+        reject(err);
+      });
   });
 };
 
@@ -56,16 +76,16 @@ const StoreInfoToFile = function GetOsInfoWriteToFileThenReadFromFile() {
             console.log(success + "\n");
           })
           .catch((error) => {
-            console.log(error+ "\n");
+            console.log(error + "\n");
           });
       })
       .catch((error) => {
-        console.log(error+ "\n");
+        console.log(error + "\n");
       });
   } catch (error) {
-    console.log(error+ "\n");
+    console.log(error + "\n");
   }
 };
-
+      
 //Calling the main function
 StoreInfoToFile();
