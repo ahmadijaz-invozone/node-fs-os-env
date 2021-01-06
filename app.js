@@ -2,7 +2,8 @@ const os = require("os");
 const fs = require("fs");
 const env = require("dotenv").config();
 
-const OsInfo = function GetOsInformation() {
+// Get the Os Info and return it
+const OsInfo = async function GetOsInformation() {
   return (
     "Type = " +
     JSON.stringify(os.type()) +
@@ -13,8 +14,23 @@ const OsInfo = function GetOsInformation() {
   );
 };
 
+//Check and create folder if it doesn't exists
+const CheckDirectory = function CheckAndCreateDirectory(Directory) {
+  return new Promise((resolve, reject) => {
+    if (!fs.existsSync(Directory)) {
+      fs.mkdir(Directory, function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve("Directory Created successfully!");
+        }
+      });
+    } else resolve("Directory already Exists!");
+  });
+};
+
 // Check file rights at given path with given rights
-const CheckFileRights = function CheckFileRightsAtFilePathWithGivenRights (FilePath, Right) {
+const CheckFileRights = function CheckRightsAtFilePath(FilePath, Right) {
   return new Promise((resolve, reject) => {
     fs.access(FilePath, Right, (err) => {
       if (err) {
@@ -30,10 +46,10 @@ const CheckFileRights = function CheckFileRightsAtFilePathWithGivenRights (FileP
 const WriteFile = function WriteFileContentToFilePath(FileContent, FilePath) {
   return new Promise((resolve, reject) => {
     CheckFileRights(FilePath, fs.constants.F_OK)
-      .then(success => {
+      .then((success) => {
         reject("File already Exists!");
       })
-      .catch(err => {
+      .catch((err) => {
         fs.writeFile(FilePath, FileContent, function (err) {
           if (err) reject(err);
           else resolve("Successful!");
@@ -45,39 +61,49 @@ const WriteFile = function WriteFileContentToFilePath(FileContent, FilePath) {
 // read file from the given path
 const ReadFile = function ReadFileContentFromFilePath(FilePath) {
   return new Promise((resolve, reject) => {
-
     CheckFileRights(FilePath, fs.constants.R_OK)
-      .then(success => {
+      .then((success) => {
         fs.readFile(FilePath, "utf8", function (err, data) {
           if (err) reject(err);
           else resolve(data);
         });
       })
-      .catch(err => {
+      .catch((err) => {
         reject(err);
       });
   });
 };
 
 //main function uses above all function
-const StoreInfoToFile = function GetOsInfoWriteToFileThenReadFromFile() {
+const StoreInfoToFile = async function GetOsInfoWriteToFileThenReadFromFile() {
   try {
-    const FileContent = OsInfo();
-    const FilePath = env.parsed.FILE_PATH + "os_info.txt";
+    const FileContent = await OsInfo();
+    const Directory = os.homedir + env.parsed.FILE_PATH;
+    const FilePath = Directory + env.parsed.FILE_NAME;
 
-    console.log("\nWrite File : ");
-    WriteFile(FileContent, FilePath)
+    console.log("\nCreate Directory : ");
+    await CheckDirectory(Directory)
       .then((success) => {
         console.log(success);
-        console.log("\nRead File : ");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
 
-        ReadFile(FilePath)
-          .then((success) => {
-            console.log(success + "\n");
-          })
-          .catch((error) => {
-            console.log(error + "\n");
-          });
+    console.log("\nWrite File : ");
+    await WriteFile(FileContent, FilePath)
+      .then((success) => {
+        console.log(success);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
+    console.log("\nRead File : ");
+
+    ReadFile(FilePath)
+      .then((success) => {
+        console.log(success + "\n");
       })
       .catch((error) => {
         console.log(error + "\n");
@@ -86,6 +112,6 @@ const StoreInfoToFile = function GetOsInfoWriteToFileThenReadFromFile() {
     console.log(error + "\n");
   }
 };
-      
+
 //Calling the main function
 StoreInfoToFile();
