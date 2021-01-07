@@ -1,64 +1,54 @@
 const os = require('os');
-const fs = require('fs');
+const fse = require('fs-extra');
 const env = require('dotenv').config();
 
 // Get the Os Info and return it
-const OsInfo = async function GetOsInformation() {
-  return `Type = ${JSON.stringify(os.type())}\nUptime = ${JSON.stringify(
+const OsInfo = async () =>
+  `Type = ${JSON.stringify(os.type())}\nUptime = ${JSON.stringify(
     os.uptime()
   )}\nMy Info = ${JSON.stringify(os.userInfo())}`;
-};
 
 // Check and create folder if it doesn't exists
-const CheckDirectory = function CheckAndCreateDirectory(Directory) {
-  return new Promise((resolve, reject) => {
-    if (!fs.existsSync(Directory)) {
-      fs.mkdir(Directory, (err) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve('Directory Created successfully!');
-        }
+const CheckDirectory = async (Directory) =>
+  new Promise((resolve, reject) => {
+    if (!fse.existsSync(Directory)) {
+      fse.mkdir(Directory, (err) => {
+        if (err) reject(err);
+        else resolve('Directory Created successfully!');
       });
     } else resolve('Directory already Exists!');
   });
-};
 
 // Check file rights at given path with given rights
-const CheckFileRights = function CheckRightsAtFilePath(FilePath, Right) {
-  return new Promise((resolve, reject) => {
-    fs.access(FilePath, Right, (err) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve('Successful.');
-      }
+const CheckFileRights = async (FilePath, Right) =>
+  new Promise((resolve, reject) => {
+    fse.access(FilePath, Right, (err) => {
+      if (err) reject(err);
+      else resolve('Successful.');
     });
   });
-};
 
 // write given content to file in a given path
-const WriteFile = function WriteFileContentToFilePath(FileContent, FilePath) {
-  return new Promise((resolve, reject) => {
-    CheckFileRights(FilePath, fs.constants.F_OK)
+const WriteFile = (FileContent, FilePath) =>
+  new Promise((resolve, reject) => {
+    CheckFileRights(FilePath, fse.constants.F_OK)
       .then(() => {
         resolve('File already Exists!');
       })
       .catch(() => {
-        fs.writeFile(FilePath, FileContent, (err) => {
+        fse.writeFile(FilePath, FileContent, (err) => {
           if (err) reject(err);
           else resolve('Successful!');
         });
       });
   });
-};
 
 // read file from the given path
-const ReadFile = function ReadFileContentFromFilePath(FilePath) {
-  return new Promise((resolve, reject) => {
-    CheckFileRights(FilePath, fs.constants.R_OK)
+const ReadFile = async (FilePath) =>
+  new Promise((resolve, reject) => {
+    CheckFileRights(FilePath, fse.constants.R_OK)
       .then(() => {
-        fs.readFile(FilePath, 'utf8', (err, data) => {
+        fse.readFile(FilePath, 'utf8', (err, data) => {
           if (err) reject(err);
           else resolve(data);
         });
@@ -67,42 +57,22 @@ const ReadFile = function ReadFileContentFromFilePath(FilePath) {
         reject(err);
       });
   });
-};
 
 // main function uses above all function
-const StoreInfoToFile = async function GetOsInfoWriteToFileThenReadFromFile() {
+const StoreInfoToFile = async () => {
   try {
     const FileContent = await OsInfo();
     const Directory = os.homedir + env.parsed.FILE_PATH;
     const FilePath = Directory + env.parsed.FILE_NAME;
 
     console.log('\nCreate Directory : ');
-    await CheckDirectory(Directory)
-      .then((success) => {
-        console.log(success);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    console.log(`${await CheckDirectory(Directory)}\n`);
 
     console.log('\nWrite File : ');
-    await WriteFile(FileContent, FilePath)
-      .then((success) => {
-        console.log(success);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    console.log(`${await WriteFile(FileContent, FilePath)}\n`);
 
     console.log('\nRead File : ');
-
-    ReadFile(FilePath)
-      .then((success) => {
-        console.log(`${success}\n`);
-      })
-      .catch((error) => {
-        console.log(`${error}\n`);
-      });
+    console.log(`${await ReadFile(FilePath)}\n`);
   } catch (error) {
     console.log(`${error}\n`);
   }

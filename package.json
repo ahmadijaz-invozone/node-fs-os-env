@@ -4,7 +4,8 @@
   "description": "Jan 05, 2021 Node Learning: FS, OS, and DotEnv are the modules used.",
   "main": "app.js",
   "dependencies": {
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "fs-extra": "^9.0.1"
   },
   "devDependencies": {
     "eslint": "^7.17.0",
@@ -25,7 +26,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint:fix & npm run prettier & npm run lint"
+      "pre-commit": "npm run lint:fix & npm run prettier & npm run lint & git add ."
     }
   },
   "repository": {
